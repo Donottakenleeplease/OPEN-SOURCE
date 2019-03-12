@@ -1,1 +1,3 @@
 fix some bug
+bug about >> error: ‘usleep’ was not declared in this scope>>
+just add  "include<unistd.h>" is fine
