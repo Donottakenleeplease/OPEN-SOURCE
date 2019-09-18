@@ -1,2 +1,2 @@
 # OPEN-SOURCE
-a litter running work about ORB_SLAM2
+Built to debug the server program
