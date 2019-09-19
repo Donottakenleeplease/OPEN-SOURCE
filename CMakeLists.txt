@@ -12,14 +12,16 @@ find_package( Threads )
 
 include_directories( 
     ${OpenCV_INCLUDE_DIRS}
+    "/home/likuilin/Yolo/darknet/include"
 )
 
 include_directories( ${PROJECT_SOURCE_DIR}/include )
 
 
-add_executable( http_conn src/mongoose.c src/test.cpp src/base64.cpp )
+add_executable( http_conn src/mongoose.c src/Sever_Yolo.cpp src/base64.cpp src/improcess.cpp )
 
 target_link_libraries( http_conn   
     ${OpenCV_LIBS} 
     ${CMAKE_THREAD_LIBS_INIT}
+    "/home/likuilin/server/libdarknet.so"
     )
