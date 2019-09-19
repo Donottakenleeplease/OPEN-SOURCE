@@ -16,6 +16,17 @@ using namespace std;
 using namespace cv;
 
 int env_handler(struct mg_connection *conn);
+
+float colors[6][3] = { {1,0,1}, {0,0,1},{0,1,1},{0,1,0},{1,1,0},{1,0,0} };
+ 
+float get_color(int c, int x, int max){
+    float ratio = ((float)x/max)*5;
+    int i = floor(ratio);
+    int j = ceil(ratio);
+    ratio -= i;
+    float r = (1-ratio) * colors[i][c] + ratio*colors[j][c];
+    return r;
+}
  
 int main(int argc, char *argv[])
 {
@@ -57,7 +68,7 @@ int env_handler(struct mg_connection *conn)
   Mat rgbImg;
 
   vector<string> classNamesVec;
-  ifstream classNamesFile("/home/lee/projects/Yolo/darknet/data/coco.names");//标签文件coco有80类
+  ifstream classNamesFile("/home/likuilin/Yolo/darknet/data/coco.names");//标签文件coco有80类
 
   if (classNamesFile.is_open())
   {
