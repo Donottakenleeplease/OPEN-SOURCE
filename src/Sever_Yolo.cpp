@@ -173,6 +173,6 @@ int env_handler(struct mg_connection *conn)
   }
   free_network(net);
 
-  mg_printf(conn,"Received:%s,%d",str_decoded.c_str(),counter);
+//  mg_printf(conn,"Received:%s,%d",str_decoded.c_str(),counter);
   return 0;
 }
