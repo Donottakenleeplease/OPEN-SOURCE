@@ -17,7 +17,7 @@ include_directories(
 include_directories( ${PROJECT_SOURCE_DIR}/include )
 
 
-add_executable( http_conn src/mongoose.c src/test.cpp )
+add_executable( http_conn src/mongoose.c src/test.cpp src/base64.cpp )
 
 target_link_libraries( http_conn   
     ${OpenCV_LIBS} 
