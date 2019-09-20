@@ -4,12 +4,13 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
-
+#include <fstream>
 #include <iostream>
  
 #include "mongoose.h"
 #include "base64.h"
 #include "improcess.h"
+#include "darknet.h"
 
  
 using namespace std;
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
   server = mg_create_server(NULL);                  // 初始化一个mongoose server
   mg_set_option(server, "listening_port", "8003");  // 设置端口号为8003
   mg_add_uri_handler(server, "/", env_handler);     // 设置回调函数
-  printf("Starting on port %s ...\n", mg_get_option(server, "listening_port"));
+  printf("Starting on port %s ...\n", mg_get_option(server, "listening_port"));  
   while (1) {
     mg_poll_server(server, 100);  // 超时时间（ms）
   }
@@ -55,26 +56,33 @@ int env_handler(struct mg_connection *conn)
   vector<BYTE> str_decoded_byte = base64_decode(str_encoded);
   Mat mat = imdecode(str_decoded_byte,CV_LOAD_IMAGE_COLOR);
 
+  timeval start, end;
+  gettimeofday(&start, NULL);
+  gettimeofday(&end, NULL);
+
 /***** 模型调用 ******/
-  string cfgfile = "/home/likuilin/Yolo/darknet/cfg/yolov3.cfg";//读取模型文件，请自行修改相应路径
-  string weightfile = "/home/likuilin/Yolo/darknet/yolov3.weights";
-  float thresh=0.5;//参数设置
-  float nms=0.35;
-  int classes=80;
-
-  network *net=load_network((char*)cfgfile.c_str(),(char*)weightfile.c_str(),0);//加载网络模型
-  set_batch_network(net, 1);
-
-  Mat rgbImg;
-
-  vector<string> classNamesVec;
-  ifstream classNamesFile("/home/likuilin/Yolo/darknet/data/coco.names");//标签文件coco有80类
-
-  if (classNamesFile.is_open())
+  if(counter == 1)
   {
-      string className = "";
-      while (getline(classNamesFile, className))
-          classNamesVec.push_back(className);
+    string cfgfile = "/home/likuilin/Yolo/darknet/cfg/yolov3.cfg";//读取模型文件，请自行修改相应路径
+    string weightfile = "/home/likuilin/Yolo/darknet/yolov3.weights";
+    float thresh=0.5;//参数设置
+    float nms=0.35;
+    int classes=80;
+
+    network *net=load_network((char*)cfgfile.c_str(),(char*)weightfile.c_str(),0);//加载网络模型
+    set_batch_network(net, 1);
+
+    Mat rgbImg;
+
+    vector<string> classNamesVec;
+    ifstream classNamesFile("/home/likuilin/Yolo/darknet/data/coco.names");//标签文件coco有80类
+
+    if (classNamesFile.is_open())
+    {
+        string className = "";
+        while (getline(classNamesFile, className))
+            classNamesVec.push_back(className);
+    }    
   }
 
   /******* 开始网络推理 ********/
