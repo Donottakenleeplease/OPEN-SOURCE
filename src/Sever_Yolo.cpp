@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
@@ -28,6 +28,14 @@ float get_color(int c, int x, int max){
     float r = (1-ratio) * colors[i][c] + ratio*colors[j][c];
     return r;
 }
+
+string cfgfile = "/home/likuilin/Yolo/darknet/cfg/yolov3.cfg";//读取模型文件，请自行修改相应路径
+string weightfile = "/home/likuilin/Yolo/darknet/yolov3.weights";
+float thresh=0.5;//参数设置
+float nms=0.35;
+int classes=1;
+
+network *net=load_network((char*)cfgfile.c_str(),(char*)weightfile.c_str(),0);//加载网络模型
  
 int main(int argc, char *argv[])
 {
@@ -40,6 +48,7 @@ int main(int argc, char *argv[])
     mg_poll_server(server, 100);  // 超时时间（ms）
   }
   mg_destroy_server(&server);
+  free_network(net);
   
   return 0;
 }
@@ -61,29 +70,21 @@ int env_handler(struct mg_connection *conn)
   gettimeofday(&end, NULL);
 
 /***** 模型调用 ******/
-  if(counter == 1)
+
+  set_batch_network(net, 1);
+
+  Mat rgbImg;
+
+  vector<string> classNamesVec;
+  ifstream classNamesFile("/home/likuilin/Yolo/darknet/data/coco.names");//标签文件coco有80类
+
+  if (classNamesFile.is_open())
   {
-    string cfgfile = "/home/likuilin/Yolo/darknet/cfg/yolov3.cfg";//读取模型文件，请自行修改相应路径
-    string weightfile = "/home/likuilin/Yolo/darknet/yolov3.weights";
-    float thresh=0.5;//参数设置
-    float nms=0.35;
-    int classes=80;
-
-    network *net=load_network((char*)cfgfile.c_str(),(char*)weightfile.c_str(),0);//加载网络模型
-    set_batch_network(net, 1);
-
-    Mat rgbImg;
-
-    vector<string> classNamesVec;
-    ifstream classNamesFile("/home/likuilin/Yolo/darknet/data/coco.names");//标签文件coco有80类
-
-    if (classNamesFile.is_open())
-    {
-        string className = "";
-        while (getline(classNamesFile, className))
-            classNamesVec.push_back(className);
-    }    
-  }
+    string className = "";
+    while (getline(classNamesFile, className))
+    classNamesVec.push_back(className);
+  }    
+  
 
   /******* 开始网络推理 ********/
 
@@ -192,7 +193,7 @@ int env_handler(struct mg_connection *conn)
 
   free(srcImg);
   free(resizeImg);
-  free_network(net);
+  
 
   printf("Counter: %3d, BBOX: %s, Time of Detect: %f\n", counter, 
                                                          detect_result.empty() ? "Null" : detect_result.c_str(), 
